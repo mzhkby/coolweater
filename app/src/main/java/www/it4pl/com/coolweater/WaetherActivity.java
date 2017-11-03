@@ -1,5 +1,6 @@
 package www.it4pl.com.coolweater;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -29,6 +30,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 import www.it4pl.com.coolweater.gson.Forecast;
 import www.it4pl.com.coolweater.gson.Weather;
+import www.it4pl.com.coolweater.service.AutoUpdateService;
 import www.it4pl.com.coolweater.util.HttpUtil;
 import www.it4pl.com.coolweater.util.Utility;
 
@@ -106,15 +108,8 @@ public class WaetherActivity extends AppCompatActivity {
         });
 
         String bingPic = prefs.getString("bing_pic", null);
-        String time = prefs.getString("time",null);
         if (bingPic != null) {
-            SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String date = sDateFormat.format(new java.util.Date());
-            if(!time.equals(date)){
-                loadBingPic();
-            }else{
                 Glide.with(this).load(bingPic).into(bingpicImg);
-            }
         } else {
             loadBingPic();
         }
@@ -195,6 +190,9 @@ public class WaetherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     /**
@@ -211,11 +209,8 @@ public class WaetherActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String bingPic = response.body().string();
-                SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String date = sDateFormat.format(new java.util.Date());
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WaetherActivity.this).edit();
                 editor.putString("bing_pic", bingPic);
-                editor.putString("time", date);
                 editor.apply();
 
                 runOnUiThread(new Runnable() {
