@@ -108,9 +108,16 @@ public class WaetherActivity extends AppCompatActivity {
         });
 
         String bingPic = prefs.getString("bing_pic", null);
-        if (bingPic != null) {
+        String time = prefs.getString("time", null);
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sDateFormat.format(new java.util.Date());
+        if (date.equals(time)){
+            if (bingPic != null) {
                 Glide.with(this).load(bingPic).into(bingpicImg);
-        } else {
+            } else {
+                loadBingPic();
+            }
+        }else{
             loadBingPic();
         }
     }
@@ -119,6 +126,7 @@ public class WaetherActivity extends AppCompatActivity {
      * 根据天气id请求城市天气信息
      */
     public void requestWeather(final String weatherId) {
+        mWeatherId = weatherId;
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=8aae86983b3748728d3464e0b62580ba";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
@@ -208,9 +216,12 @@ public class WaetherActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String date = sDateFormat.format(new java.util.Date());
                 final String bingPic = response.body().string();
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WaetherActivity.this).edit();
                 editor.putString("bing_pic", bingPic);
+                editor.putString("time",date);
                 editor.apply();
 
                 runOnUiThread(new Runnable() {
